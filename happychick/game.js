@@ -1,4 +1,3 @@
-// Polyfill: 确保在不支持 requestAnimationFrame 的环境下使用 setTimeout 实现
 // 获取 canvas 和绘图上下文
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -86,6 +85,3 @@ canvas.addEventListener("click", function(event) {
     currentState = "egg";
   }
 });
-
-// 启动游戏循环
-window.requestAnimationFrame(gameLoop);
