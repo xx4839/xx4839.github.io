@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPW3 Tetris</title>
+    <style>
+        body {
+            background: #fff;
+            margin: 0;
+            touch-action: none;
+            -webkit-user-select: none;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #game {
+            width: 200px;
+            height: 400px;
+            margin: 20px auto;
+            border: 2px solid #333;
+            position: relative;
+            background: #f0f0f0;
+        }
+        .cell {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+        }
+        #score {
+            font-size: 20px;
+            margin: 10px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #eee;
+            border: 2px solid #666;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
+    <div id="game"></div>
+    <div class="controls">
+        <div class="btn" ontouchstart="moveLeft()" onclick="moveLeft()">←</div>
+        <div class="btn" ontouchstart="moveRight()" onclick="moveRight()">→</div>
+        <div class="btn" ontouchstart="rotate()" onclick="rotate()">↻</div>
+        <div class="btn" ontouchstart="drop()" onclick="drop()">↓</div>
+    </div>
+
+<script>
+// 游戏配置
+var COLS = 10; // 列数
+var ROWS = 20; // 行数
+var CELL_SIZE = 20; // 每个格子的大小
+var gameInterval = 500; // 下落间隔（毫秒）
+var score = 0; // 分数
+var gameLoop; // 游戏循环
+var gameBoard = []; // 游戏棋盘
+var currentPiece; // 当前方块
+var currentX, currentY; // 当前方块的位置
+
+// 方块形状
+var pieces = [
+    [[1, 1, 1, 1]], // I
+    [[1, 1], [1, 1]], // O
+    [[1, 1, 0], [0, 1, 1]], // Z
+    [[0, 1, 1], [1, 1, 0]], // S
+    [[1, 1, 1], [0, 1, 0]], // T
+    [[1, 1, 1], [1, 0, 0]], // L
+    [[1, 1, 1], [0, 0, 1]]  // J
+];
+
+// 初始化游戏
+function initGame() {
+    // 初始化棋盘
+    for (var y = 0; y < ROWS; y++) {
+        gameBoard[y] = [];
+        for (var x = 0; x < COLS; x++) {
+            gameBoard[y][x] = 0;
+        }
+    }
+
+    // 生成第一个方块
+    spawnPiece();
+
+    // 启动游戏循环
+    gameLoop = setInterval(gameTick, gameInterval);
+}
+
+// 生成新方块
+function spawnPiece() {
+    var randomIndex = Math.floor(Math.random() * pieces.length);
+    currentPiece = pieces[randomIndex];
+    currentX = Math.floor(COLS / 2) - Math.floor(currentPiece[0].length / 2);
+    currentY = 0;
+
+    // 检查游戏结束
+    if (checkCollision(currentPiece, currentX, currentY)) {
+        clearInterval(gameLoop);
+        alert("Game Over! Score: " + score);
+        initGame();
+    }
+}
+
+// 游戏主循环
+function gameTick() {
+    if (!checkCollision(currentPiece, currentX, currentY + 1)) {
+        currentY++;
+    } else {
+        // 固定方块到棋盘
+        for (var y = 0; y < currentPiece.length; y++) {
+            for (var x = 0; x < currentPiece[y].length; x++) {
+                if (currentPiece[y][x]) {
+                    gameBoard[currentY + y][currentX + x] = 1;
+                }
+            }
+        }
+
+        // 检查并清除满行
+        clearLines();
+
+        // 生成新方块
+        spawnPiece();
+    }
+
+    // 渲染游戏
+    render();
+}
+
+// 渲染游戏
+function render() {
+    var game = document.getElementById('game');
+    game.innerHTML = '';
+
+    // 渲染棋盘
+    for (var y = 0; y < ROWS; y++) {
+        for (var x = 0; x < COLS; x++) {
+            if (gameBoard[y][x]) {
+                var cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.style.left = x * CELL_SIZE + 'px';
+                cell.style.top = y * CELL_SIZE + 'px';
+                cell.style.backgroundColor = '#333';
+                game.appendChild(cell);
+            }
+        }
+    }
+
+    // 渲染当前方块
+    for (var y = 0; y < currentPiece.length; y++) {
+        for (var x = 0; x < currentPiece[y].length; x++) {
+            if (currentPiece[y][x]) {
+                var cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.style.left = (currentX + x) * CELL_SIZE + 'px';
+                cell.style.top = (currentY + y) * CELL_SIZE + 'px';
+                cell.style.backgroundColor = '#FF4444';
+                game.appendChild(cell);
+            }
+        }
+    }
+}
+
+// 检查碰撞
+function checkCollision(piece, offsetX, offsetY) {
+    for (var y = 0; y < piece.length; y++) {
+        for (var x = 0; x < piece[y].length; x++) {
+            if (piece[y][x]) {
+                var newX = offsetX + x;
+                var newY = offsetY + y;
+
+                if (newX < 0 || newX >= COLS || newY >= ROWS || gameBoard[newY][newX]) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// 清除满行
+function clearLines() {
+    for (var y = ROWS - 1; y >= 0; y--) {
+        if (gameBoard[y].every(cell => cell === 1)) {
+            gameBoard.splice(y, 1);
+            gameBoard.unshift(new Array(COLS).fill(0));
+            score += 10;
+            document.getElementById('score').textContent = 'Score: ' + score;
+        }
+    }
+}
+
+// 控制函数
+function moveLeft() {
+    if (!checkCollision(currentPiece, currentX - 1, currentY)) {
+        currentX--;
+        render();
+    }
+}
+
+function moveRight() {
+    if (!checkCollision(currentPiece, currentX + 1, currentY)) {
+        currentX++;
+        render();
+    }
+}
+
+function rotate() {
+    var newPiece = currentPiece[0].map((_, i) =>
+        currentPiece.map(row => row[i]).reverse()
+    );
+    if (!checkCollision(newPiece, currentX, currentY)) {
+        currentPiece = newPiece;
+        render();
+    }
+}
+
+function drop() {
+    while (!checkCollision(currentPiece, currentX, currentY + 1)) {
+        currentY++;
+    }
+    gameTick();
+}
+
+// 启动游戏
+initGame();
+</script>
+</body>
+</html>
