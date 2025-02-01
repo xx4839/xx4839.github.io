@@ -85,3 +85,6 @@ canvas.addEventListener("click", function(event) {
     currentState = "egg";
   }
 });
+
+// 启动游戏循环
+window.requestAnimationFrame(gameLoop);
