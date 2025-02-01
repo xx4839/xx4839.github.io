@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPW3 Snake</title>
+    <style>
+        body {
+            background: #fff;
+            margin: 0;
+            touch-action: none;
+            -webkit-user-select: none;
+        }
+        #game {
+            width: 800px;
+            height: 800px;
+            position: relative;
+            margin: 20px auto;
+            border: 1px solid #666;  /* 加深边框颜色 */
+        }
+        .pixel, #food {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            background: #000;
+            border: 1px solid #fff;  /* 增加对比度 */
+        }
+        #food {
+            background: #FF4444;
+            border: none;
+        }
+        #score {
+            text-align: center;
+            font-size: 22px;  /* 增大字体 */
+            padding: 10px;
+            color: #333;
+        }
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 24px 60px;  /* 增大按钮尺寸 */
+            margin: 5px;
+            background: #eee;
+            border: 2px solid #666;  /* 加深边框 */
+            border-radius: 5px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
+    <div id="game"></div>
+    <div class="controls">
+        <div class="btn" ontouchstart="changeDirection(0,-1)" onclick="changeDirection(0,-1)">↑</div><br>
+        <div class="btn" ontouchstart="changeDirection(-1,0)" onclick="changeDirection(-1,0)">←</div>
+        <div class="btn" ontouchstart="changeDirection(1,0)" onclick="changeDirection(1,0)">→</div><br>
+        <div class="btn" ontouchstart="changeDirection(0,1)" onclick="changeDirection(0,1)">↓</div>
+    </div>
+
+<script>
+var GRID_SIZE = 40;
+var CELL_SIZE = 20;
+var snake = [{x:20, y:20}];
+var food = {x:0, y:0};
+var direction = {x:1, y:0};
+var score = 0;
+var gameLoop;
+
+function initGame() {
+    var game = document.getElementById('game');
+    game.style.width = GRID_SIZE * CELL_SIZE + 'px';
+    game.style.height = GRID_SIZE * CELL_SIZE + 'px';
+    
+    createFood();
+    drawSnake();
+    gameLoop = setInterval(moveSnake, 1000);
+}
+
+function createFood() {
+    food = {
+        x: Math.floor(Math.random() * GRID_SIZE),
+        y: Math.floor(Math.random() * GRID_SIZE)
+    };
+    drawFood();
+}
+
+function drawFood() {
+    var foodElement = document.getElementById('food');
+    if (!foodElement) {
+        foodElement = document.createElement('div');
+        foodElement.id = 'food';
+        document.getElementById('game').appendChild(foodElement);
+    }
+    foodElement.style.left = food.x * CELL_SIZE + 'px';
+    foodElement.style.top = food.y * CELL_SIZE + 'px';
+}
+
+function drawSnake() {
+    var game = document.getElementById('game');
+    var pixels = game.querySelectorAll('.pixel');
+    for (var i = 0; i < pixels.length; i++) {
+        game.removeChild(pixels[i]);
+    }
+    
+    snake.forEach(function(segment) {
+        var element = document.createElement('div');
+        element.className = 'pixel';
+        element.style.left = segment.x * CELL_SIZE + 'px';
+        element.style.top = segment.y * CELL_SIZE + 'px';
+        game.appendChild(element);
+    });
+}
+
+function moveSnake() {
+    var head = {
+        x: (snake[0].x + direction.x + GRID_SIZE) % GRID_SIZE,
+        y: (snake[0].y + direction.y + GRID_SIZE) % GRID_SIZE
+    };
+
+    if (checkCollision(head)) {
+        gameOver();
+        return;
+    }
+
+    snake.unshift(head);
+
+    if (head.x === food.x && head.y === food.y) {
+        score++;
+        document.getElementById('score').textContent = 'Score: ' + score;
+        createFood();
+    } else {
+        snake.pop();
+    }
+
+    drawSnake();
+}
+
+function checkCollision(head) {
+    for (var i = 0; i < snake.length; i++) {
+        if (snake[i].x === head.x && snake[i].y === head.y) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function changeDirection(dx, dy) {
+    if (direction.x !== -dx && direction.y !== -dy) {
+        direction = {x: dx, y: dy};
+    }
+}
+
+function gameOver() {
+    clearInterval(gameLoop);
+    alert('Game Over! Score: ' + score);
+    snake = [{x:20, y:20}];
+    direction = {x:1, y:0};
+    score = 0;
+    document.getElementById('score').textContent = 'Score: 0';
+    createFood();
+    gameLoop = setInterval(moveSnake, 1000);
+}
+
+initGame();
+</script>
+</body>
+</html>
