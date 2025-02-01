@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Advanced Test</title>
+    <title>Canvas Animation</title>
 </head>
 <body>
-    <h1>Canvas Advanced Test</h1>
-    <canvas id="myCanvas" width="400" height="400" style="border:1px solid #000000;">
+    <h1>Canvas Animation</h1>
+    <canvas id="myCanvas" width="400" height="200" style="border:1px solid #000000;">
         Your browser does not support the HTML5 canvas tag.
     </canvas>
 
@@ -15,21 +15,35 @@
         var canvas = document.getElementById('myCanvas');
         var ctx = canvas.getContext('2d');
 
-        // 绘制矩形
-        ctx.fillStyle = 'green';
-        ctx.fillRect(10, 10, 100, 100);
+        var img = new Image();
+        img.src = 'images/egg.png';
 
-        // 绘制圆形
-        ctx.beginPath();
-        ctx.arc(200, 100, 50, 0, Math.PI * 2, true);
-        ctx.fillStyle = 'blue';
-        ctx.fill();
-        ctx.stroke();
+        var x = 0; // 图片的初始 x 坐标
+        var speed = 2; // 移动速度
 
-        // 绘制文字
-        ctx.font = '20px Arial';
-        ctx.fillStyle = 'black';
-        ctx.fillText('Hello, Canvas!', 10, 200);
+        function draw() {
+            // 清空 Canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制图片
+            ctx.drawImage(img, x, 50);
+
+            // 更新 x 坐标
+            x += speed;
+
+            // 如果图片超出 Canvas 边界，重置位置
+            if (x > canvas.width) {
+                x = -img.width;
+            }
+
+            // 请求下一帧动画
+            requestAnimationFrame(draw);
+        }
+
+        // 图片加载完成后启动动画
+        img.onload = function() {
+            draw();
+        };
     </script>
 </body>
 </html>
