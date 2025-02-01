@@ -1,3 +1,11 @@
+// Polyfill: 确保在不支持 requestAnimationFrame 的环境下使用 setTimeout 实现
+window.requestAnimationFrame = window.requestAnimationFrame ||
+                               window.webkitRequestAnimationFrame ||
+                               window.mozRequestAnimationFrame ||
+                               function(callback) {
+                                  return setTimeout(callback, 1000 / 60);
+                               };
+
 // 获取 canvas 和绘图上下文
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -36,9 +44,11 @@ const eggAnimFrames = [];
 // 新增素材：静态鸡蛋和分数底板
 const eggImage = new Image();
 eggImage.src = 'images/egg.png';
+eggImage.onerror = function() { console.error("加载 egg.png 失败"); };
 
 const scoreImage = new Image();
 scoreImage.src = 'images/score.png';
+scoreImage.onerror = function() { console.error("加载 score.png 失败"); };
 
 // 通用图片加载函数：依次加载各组图片
 function loadImages(sources, targetArray, callback) {
@@ -51,6 +61,9 @@ function loadImages(sources, targetArray, callback) {
       if (loadedCount === sources.length) {
         callback();
       }
+    };
+    img.onerror = () => {
+      console.error("加载图片失败：", src);
     };
     targetArray.push(img);
   });
@@ -105,7 +118,7 @@ function gameLoop(timestamp) {
   } else if (currentState === "egg") {
     // 播放下蛋动画，当动画播放完毕时执行下蛋逻辑
     if (frameIndex >= eggAnimFrames.length) {
-      // 下蛋位置：小鸡正下方，水平居中
+      // 下蛋位置：小鸡正下方，以小鸡底部为基准居中显示
       laidEggs.push({
         x: chickX + chickWidth / 2 - eggImage.width / 2,
         y: chickY + chickHeight
