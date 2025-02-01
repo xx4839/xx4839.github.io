@@ -1,48 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canvas 排查测试</title>
-  <style>
-    body { margin: 0; padding: 0; background: #ccc; }
-    canvas {
-      display: block;
-      margin: 20px auto;
-      border: 1px solid #000;
-      background-color: #fff;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test</title>
 </head>
 <body>
-  <canvas id="myCanvas" width="400" height="300"></canvas>
-  <script>
-    // Polyfill: 确保在不支持 requestAnimationFrame 的环境下使用 setTimeout
-    window.requestAnimationFrame = window.requestAnimationFrame ||
-      window.webkitRequestAnimationFrame ||
-      window.mozRequestAnimationFrame ||
-      function(callback) { setTimeout(callback, 1000/60); };
+    <h1>JavaScript Test</h1>
+    <p id="demo">JavaScript is not supported.</p>
 
-    const canvas = document.getElementById("myCanvas");
-    const ctx = canvas.getContext("2d");
-
-    // 简单动画循环，绘制红色矩形和提示文字
-    function draw() {
-      // 清除画布
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 绘制一个红色矩形
-      ctx.fillStyle = "red";
-      ctx.fillRect(50, 50, 100, 100);
-
-      // 绘制文字提示
-      ctx.fillStyle = "black";
-      ctx.font = "20px Arial";
-      ctx.fillText("Canvas 工作正常", 50, 200);
-
-      requestAnimationFrame(draw);
-    }
-    draw();
-  </script>
+    <script>
+        document.getElementById("demo").innerHTML = "JavaScript is supported!";
+    </script>
 </body>
 </html>
