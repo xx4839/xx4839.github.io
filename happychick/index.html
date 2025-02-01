@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Frame Animation with Movement</title>
+    <title>Chicken and Eggs</title>
 </head>
 <body>
-    <h1>Canvas Frame Animation with Movement</h1>
-    <canvas id="myCanvas" width="400" height="200" style="border:1px solid #000000;">
+    <h1>Chicken and Eggs</h1>
+    <canvas id="myCanvas" width="600" height="400" style="border:1px solid #000000;">
         Your browser does not support the HTML5 canvas tag.
     </canvas>
 
@@ -16,55 +16,129 @@
         var ctx = canvas.getContext('2d');
 
         // 图片路径
-        var imagePaths = ['images/idle1.png', 'images/idle2.png'];
-        var images = []; // 存储加载的图片
+        var chickImages = ['images/idle1.png', 'images/idle2.png']; // 小鸡帧动画图片
+        var eggImage = new Image();
+        eggImage.src = 'images/egg.png'; // 鸡蛋图片
+        var scoreImage = new Image();
+        scoreImage.src = 'images/score.png'; // 分数背景图片
+
+        // 小鸡帧动画相关变量
+        var chickFrames = []; // 存储加载的小鸡帧动画图片
         var currentFrame = 0; // 当前帧索引
-        var frameCount = imagePaths.length; // 总帧数
-        var x = 0; // 图片的初始 x 坐标
-        var y = 50; // 图片的 y 坐标
-        var speed = 1; // 移动速度
-        var frameDelay = 100; // 每帧的延迟时间（毫秒）
+        var frameDelay = 200; // 每帧的延迟时间（毫秒）
+
+        // 小鸡位置
+        var chickX = canvas.width / 2;
+        var chickY = canvas.height / 2;
+
+        // 游戏状态
+        var currentState = "idle"; // idle（待机）、egg（下蛋）
+        var laidEggs = []; // 已下鸡蛋数组
+        var score = 0; // 分数
 
         // 加载所有图片
         function loadImages() {
             var loadedCount = 0;
-            imagePaths.forEach(function(path, index) {
+            chickImages.forEach(function(path, index) {
                 var img = new Image();
                 img.src = path;
                 img.onload = function() {
                     loadedCount++;
-                    if (loadedCount === frameCount) {
-                        // 所有图片加载完成后启动动画
+                    chickFrames[index] = img;
+                    if (loadedCount === chickImages.length + 2) { // 所有图片加载完成
                         setTimeout(draw, frameDelay);
                     }
                 };
                 img.onerror = function() {
                     console.error('Failed to load image:', path);
                 };
-                images[index] = img;
             });
+
+            eggImage.onload = function() {
+                loadedCount++;
+                if (loadedCount === chickImages.length + 2) {
+                    setTimeout(draw, frameDelay);
+                }
+            };
+            eggImage.onerror = function() {
+                console.error('Failed to load egg image.');
+            };
+
+            scoreImage.onload = function() {
+                loadedCount++;
+                if (loadedCount === chickImages.length + 2) {
+                    setTimeout(draw, frameDelay);
+                }
+            };
+            scoreImage.onerror = function() {
+                console.error('Failed to load score image.');
+            };
         }
 
-        // 绘制动画
+        // 绘制游戏界面
         function draw() {
             // 清空 Canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 绘制当前帧的图片
-            ctx.drawImage(images[currentFrame], x, y);
+            // 绘制所有已下的鸡蛋
+            laidEggs.forEach(function(egg) {
+                ctx.drawImage(eggImage, egg.x, egg.y);
+            });
+
+            // 绘制小鸡（帧动画）
+            if (chickFrames[currentFrame]) {
+                ctx.drawImage(chickFrames[currentFrame], chickX, chickY);
+            }
 
             // 切换到下一帧
-            currentFrame = (currentFrame + 1) % frameCount;
+            currentFrame = (currentFrame + 1) % chickFrames.length;
 
-            // 更新 x 坐标
-            x += speed;
-            if (x > canvas.width) {
-                x = -images[currentFrame].width; // 移出 Canvas 后重置位置
+            // 绘制右上角分数板
+            if (scoreImage.complete) {
+                const scoreBoardX = canvas.width - scoreImage.width - 10;
+                const scoreBoardY = 10;
+                ctx.drawImage(scoreImage, scoreBoardX, scoreBoardY);
+                ctx.font = "20px Arial";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.fillText(score, scoreBoardX + scoreImage.width / 2, scoreBoardY + scoreImage.height / 2 + 7);
             }
 
             // 请求下一帧动画
             setTimeout(draw, frameDelay);
         }
+
+        // 监听 canvas 的点击事件
+        canvas.addEventListener("click", function(event) {
+            if (currentState !== "idle") return;
+
+            // 获取点击位置（相对于 canvas）
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            // 检查点击是否落在小鸡范围内
+            if (clickX >= chickX && clickX <= chickX + chickFrames[0].width &&
+                clickY >= chickY && clickY <= chickY + chickFrames[0].height) {
+                // 随机生成新的目标位置（保证小鸡不会超出画布边界）
+                chickX = Math.random() * (canvas.width - chickFrames[0].width);
+                chickY = Math.random() * (canvas.height - chickFrames[0].height);
+                // 切换到下蛋状态
+                currentState = "egg";
+
+                // 下蛋逻辑
+                laidEggs.push({
+                    x: chickX + chickFrames[0].width / 2 - eggImage.width / 2,
+                    y: chickY + chickFrames[0].height
+                });
+                score++; // 分数加 1
+
+                // 下蛋后回到待机状态
+                setTimeout(function() {
+                    currentState = "idle";
+                }, 500); // 延迟 500 毫秒后回到待机状态
+            }
+        });
 
         // 启动图片加载
         loadImages();
