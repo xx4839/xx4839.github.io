@@ -63,8 +63,8 @@ function gameLoop(timestamp) {
     ctx.fillText(score, scoreBoardX + scoreImage.width / 2, scoreBoardY + scoreImage.height / 2 + 7);
   }
   
-  //window.requestAnimationFrame(gameLoop);
-//setInterval(gameLoop, 16);
+
+setTimeout(gameLoop, 16);
 }
 
 // 监听 canvas 的点击事件：仅在 idle 状态下响应点击
@@ -88,5 +88,5 @@ canvas.addEventListener("click", function(event) {
 });
 
 // 启动游戏循环
-//window.requestAnimationFrame(gameLoop);
-setInterval(gameLoop, 16);
+
+setTimeout(gameLoop, 16);
