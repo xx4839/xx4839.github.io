@@ -36,8 +36,8 @@
                 x = -img.width; // 重置到左侧
             }
 
-            // 请求下一帧动画
-            requestAnimationFrame(draw);
+            // 使用 setTimeout 代替 requestAnimationFrame
+            setTimeout(draw, 30); // 每 30 毫秒更新一帧
         }
 
         // 图片加载完成后启动动画
