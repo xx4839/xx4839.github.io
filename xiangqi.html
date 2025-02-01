@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>中国象棋 - Kindle版</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .board { display: grid; grid-template-columns: repeat(9, 40px); gap: 2px; margin: 20px auto; width: 380px; }
+        .cell { width: 40px; height: 40px; border: 1px solid black; display: flex; align-items: center; justify-content: center; }
+        .piece { font-size: 24px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>中国象棋</h2>
+    <div class="board" id="board"></div>
+    <script>
+        const board = document.getElementById("board");
+        const initialBoard = [
+            "车", "马", "相", "士", "将", "士", "相", "马", "车",
+            "", "炮", "", "", "", "", "", "炮", "",
+            "兵", "", "兵", "", "兵", "", "兵", "", "兵",
+            "", "", "", "", "", "", "", "", "",
+            "", "", "", "", "", "", "", "", "",
+            "卒", "", "卒", "", "卒", "", "卒", "", "卒",
+            "", "炮", "", "", "", "", "", "炮", "",
+            "車", "馬", "象", "仕", "帅", "仕", "象", "馬", "車"
+        ];
+        
+        function createBoard() {
+            board.innerHTML = "";
+            initialBoard.forEach((piece, index) => {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+                if (piece) {
+                    const pieceElement = document.createElement("div");
+                    pieceElement.classList.add("piece");
+                    pieceElement.textContent = piece;
+                    cell.appendChild(pieceElement);
+                }
+                board.appendChild(cell);
+            });
+        }
+        createBoard();
+    </script>
+</body>
+</html>
