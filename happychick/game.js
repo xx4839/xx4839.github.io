@@ -1,11 +1,3 @@
-// Polyfill: 确保在不支持 requestAnimationFrame 的环境下使用 setTimeout 实现
-window.requestAnimationFrame = window.requestAnimationFrame ||
-                               window.webkitRequestAnimationFrame ||
-                               window.mozRequestAnimationFrame ||
-                               function(callback) {
-                                  return setTimeout(callback, 1000 / 60);
-                               };
-
 // 获取 canvas 和绘图上下文
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -61,7 +53,7 @@ const totalImages = 5; // idleImage, moveImage, eggImage, staticEggImage, scoreI
 function checkImagesLoaded() {
   imagesLoaded++;
   if (imagesLoaded === totalImages) {
-    window.requestAnimationFrame(gameLoop);
+    startGameLoop();
   }
 }
 
@@ -72,7 +64,7 @@ staticEggImage.onload = checkImagesLoaded;
 scoreImage.onload = checkImagesLoaded;
 
 // 游戏主循环
-function gameLoop(timestamp) {
+function gameLoop() {
   // 清空画布
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
@@ -138,7 +130,13 @@ function gameLoop(timestamp) {
     ctx.fillText(score, scoreBoardX + scoreImage.width / 2, scoreBoardY + scoreImage.height / 2 + 7);
   }
   
-  window.requestAnimationFrame(gameLoop);
+  // 使用 setTimeout 递归调用 gameLoop，实现动画循环
+  setTimeout(gameLoop, 1000 / 60); // 每秒 60 帧
+}
+
+// 启动游戏循环
+function startGameLoop() {
+  gameLoop();
 }
 
 // 监听 canvas 的点击事件：仅在 idle 状态下响应点击
