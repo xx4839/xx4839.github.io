@@ -41,12 +41,15 @@
         function drawRect(x, y, color) {
             ctx.fillStyle = color;
             ctx.fillRect(x, y, gridSize, gridSize);
+            ctx.strokeStyle = "black"; // Kindle 电子墨水屏需要边框清晰
+            ctx.strokeRect(x, y, gridSize, gridSize);
         }
 
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height); // 彻底刷新屏幕
             snake.forEach(p => drawRect(p.x, p.y, "white"));
-            drawRect(food.x, food.y, "red");
+            drawRect(food.x, food.y, "white"); // 颜色改成白色适配 Kindle
         }
 
         function update() {
@@ -85,7 +88,7 @@
 
         function gameLoop() {
             clearInterval(gameInterval);
-            gameInterval = setInterval(() => { update(); draw(); }, 1000);
+            gameInterval = setInterval(() => { update(); draw(); }, 1000); // Kindle 电子墨水屏需要低刷新率
         }
 
         gameLoop();
