@@ -5,34 +5,41 @@ const ctx = canvas.getContext('2d');
 // 创建图片对象
 const imgIdle1 = new Image();
 const imgIdle2 = new Image();
-imgIdle1.src = 'images/idle1.png';  // 图片路径
-imgIdle2.src = 'images/idle2.png';  // 图片路径
+imgIdle1.src = 'images/idle1.png';  // 请确保路径正确
+imgIdle2.src = 'images/idle2.png';  // 请确保路径正确
 
-// 当前显示的图片
-let currentImage = imgIdle1;
+// 定义当前显示的图片标志
+let currentImage = 1;
 
-// 设定动画间隔（每500ms切换图片）
-let frame = 0;  // 计数器，用于切换帧
+// 图片加载完成后启动动画
+let imagesLoaded = 0;
+const totalImages = 2; // 我们有两个图片
 
-// 绘制函数
-function draw() {
-  // 清空画布
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 绘制当前的图片
-  ctx.drawImage(currentImage, 0, 0);  // 你可以设置位置
-
-  // 每次切换图片
-  frame++;
-  if (frame % 10 === 0) {  // 每10帧切换一次图片
-    currentImage = (currentImage === imgIdle1) ? imgIdle2 : imgIdle1;
+// 检查图片是否加载完毕
+function checkImagesLoaded() {
+  imagesLoaded++;
+  if (imagesLoaded === totalImages) {
+    startIdleAnimation();
   }
-
-  // 继续下一帧
-  requestAnimationFrame(draw);
 }
 
-// 等待图片加载完成后开始绘制
-imgIdle1.onload = imgIdle2.onload = function() {
-  draw();
-};
+// 设置图片加载完成的回调
+imgIdle1.onload = checkImagesLoaded;
+imgIdle2.onload = checkImagesLoaded;
+
+// 轮流切换待机图片
+function startIdleAnimation() {
+  setInterval(function() {
+    // 清空画布
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 根据当前图片标志来决定绘制哪张图片
+    if (currentImage === 1) {
+      ctx.drawImage(imgIdle1, 0, 0);
+      currentImage = 2;
+    } else {
+      ctx.drawImage(imgIdle2, 0, 0);
+      currentImage = 1;
+    }
+  }, 500); // 每500毫秒切换一次
+}
