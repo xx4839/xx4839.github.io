@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Chicken and Eggs</h1>
-    <canvas id="myCanvas" width="600" height="400" style="border:1px solid #000000;">
+    <canvas id="myCanvas" width="1200" height="1200" style="border:1px solid #000000;">
         Your browser does not support the HTML5 canvas tag.
     </canvas>
 
@@ -25,7 +25,7 @@
         // 小鸡帧动画相关变量
         var chickFrames = []; // 存储加载的小鸡帧动画图片
         var currentFrame = 0; // 当前帧索引
-        var frameDelay = 200; // 每帧的延迟时间（毫秒）
+        var frameDelay = 500; // 每帧的延迟时间（毫秒）
 
         // 小鸡位置
         var chickX = canvas.width / 2;
@@ -129,7 +129,7 @@
                 // 下蛋逻辑
                 laidEggs.push({
                     x: chickX + chickFrames[0].width / 2 - eggImage.width / 2,
-                    y: chickY + chickFrames[0].height
+                    y: chickY + chickFrames[0].height - 20
                 });
                 score++; // 分数加 1
 
