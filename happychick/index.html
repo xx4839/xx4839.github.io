@@ -1,186 +1,73 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小鸡下蛋小游戏</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #87CEEB; }
-        #gameCanvas { display: block; }
-        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    </style>
+    <title>Canvas Frame Animation with Movement</title>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div id="loading">资源加载中...</div>
+    <h1>Canvas Frame Animation with Movement</h1>
+    <canvas id="myCanvas" width="400" height="200" style="border:1px solid #000000;">
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
 
-<script>
-class ChickenGame {
-    constructor() {
-        this.canvas = document.getElementById('gameCanvas');
-        this.ctx = this.canvas.getContext('2d');
-        this.resizeCanvas();
-        this.gameScale = 2; // 高清缩放比例
-        this.assets = {
-            chick: ['idle1.png', 'idle2.png'],
-            egg: 'egg.png',
-            scoreBoard: 'score.png'
-        };
-        this.loaded = false;
-        this.init();
-    }
+    <script>
+        var canvas = document.getElementById('myCanvas');
+        var ctx = canvas.getContext('2d');
 
-    async init() {
-        window.addEventListener('resize', () => this.resizeCanvas());
-        await this.loadResources();
-        this.setupGame();
-        this.startGame();
-    }
+        // 图片路径
+        var imagePaths = ['images/idle1.png', 'images/idle2.png'];
+        var images = []; // 存储加载的图片
+        var currentFrame = 0; // 当前帧索引
+        var frameCount = imagePaths.length; // 总帧数
+        var x = 0; // 图片的初始 x 坐标
+        var y = 50; // 图片的 y 坐标
+        var speed = 1; // 移动速度
+        var frameDelay = 100; // 每帧的延迟时间（毫秒）
 
-    resizeCanvas() {
-        this.canvas.width = window.innerWidth * window.devicePixelRatio;
-        this.canvas.height = window.innerHeight * window.devicePixelRatio;
-        this.canvas.style.width = window.innerWidth + 'px';
-        this.canvas.style.height = window.innerHeight + 'px';
-    }
-
-    async loadResources() {
-        try {
-            // 预加载所有资源
-            this.images = {
-                chick: await this.loadImageSeries(this.assets.chick),
-                egg: await this.loadImage(this.assets.egg),
-                scoreBoard: await this.loadImage(this.assets.scoreBoard)
-            };
-            
-            document.getElementById('loading').remove();
-            this.loaded = true;
-        } catch (error) {
-            console.error('资源加载失败:', error);
-            document.getElementById('loading').textContent = '资源加载失败，请刷新重试';
+        // 加载所有图片
+        function loadImages() {
+            var loadedCount = 0;
+            imagePaths.forEach(function(path, index) {
+                var img = new Image();
+                img.src = path;
+                img.onload = function() {
+                    loadedCount++;
+                    if (loadedCount === frameCount) {
+                        // 所有图片加载完成后启动动画
+                        setTimeout(draw, frameDelay);
+                    }
+                };
+                img.onerror = function() {
+                    console.error('Failed to load image:', path);
+                };
+                images[index] = img;
+            });
         }
-    }
 
-    loadImage(path) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.src = 'images/' + path;
-            img.onload = () => resolve(img);
-            img.onerror = () => reject(`图片加载失败: ${path}`);
-        });
-    }
+        // 绘制动画
+        function draw() {
+            // 清空 Canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    loadImageSeries(paths) {
-        return Promise.all(paths.map(p => this.loadImage(p)));
-    }
+            // 绘制当前帧的图片
+            ctx.drawImage(images[currentFrame], x, y);
 
-    setupGame() {
-        // 游戏状态初始化
-        this.chick = {
-            x: this.canvas.width/2,
-            y: this.canvas.height/2,
-            frame: 0,
-            state: 'idle',
-            animationTimer: 0
-        };
-        
-        this.eggs = [];
-        this.score = 0;
-        
-        // 事件监听
-        this.canvas.addEventListener('click', (e) => this.handleClick(e));
-        this.canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.handleClick(e.touches[0]);
-        });
-    }
+            // 切换到下一帧
+            currentFrame = (currentFrame + 1) % frameCount;
 
-    handleClick(event) {
-        if (!this.loaded || this.chick.state !== 'idle') return;
-
-        const rect = this.canvas.getBoundingClientRect();
-        const clickX = (event.clientX - rect.left) * this.gameScale;
-        const clickY = (event.clientY - rect.top) * this.gameScale;
-
-        if (this.checkCollision(clickX, clickY)) {
-            this.moveChicken();
-            this.chick.state = 'egg';
-            setTimeout(() => {
-                this.layEgg();
-                this.chick.state = 'idle';
-            }, 300); // 下蛋动作持续时间
-        }
-    }
-
-    checkCollision(x, y) {
-        const chicken = this.images.chick[0];
-        return x > this.chick.x && x < this.chick.x + chicken.width &&
-               y > this.chick.y && y < this.chick.y + chicken.height;
-    }
-
-    moveChicken() {
-        const chicken = this.images.chick[0];
-        this.chick.x = Math.random() * (this.canvas.width - chicken.width);
-        this.chick.y = Math.random() * (this.canvas.height - chicken.height);
-    }
-
-    layEgg() {
-        const chicken = this.images.chick[0];
-        this.eggs.push({
-            x: this.chick.x + chicken.width/2 - this.images.egg.width/2,
-            y: this.chick.y + chicken.height,
-            timer: Date.now()
-        });
-        this.score++;
-    }
-
-    updateAnimation() {
-        if (this.chick.state === 'idle') {
-            this.chick.animationTimer++;
-            if (this.chick.animationTimer % 10 === 0) {
-                this.chick.frame = (this.chick.frame + 1) % this.images.chick.length;
+            // 更新 x 坐标
+            x += speed;
+            if (x > canvas.width) {
+                x = -images[currentFrame].width; // 移出 Canvas 后重置位置
             }
+
+            // 请求下一帧动画
+            setTimeout(draw, frameDelay);
         }
-    }
 
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // 绘制鸡蛋
-        this.eggs.forEach(egg => {
-            this.ctx.drawImage(this.images.egg, egg.x, egg.y);
-        });
-
-        // 绘制小鸡
-        const currentFrame = this.images.chick[this.chick.frame];
-        this.ctx.drawImage(currentFrame, this.chick.x, this.chick.y);
-
-        // 绘制分数板
-        const scoreBoard = this.images.scoreBoard;
-        const boardX = this.canvas.width - scoreBoard.width - 20;
-        const boardY = 20;
-        this.ctx.drawImage(scoreBoard, boardX, boardY);
-        this.ctx.fillStyle = 'white';
-        this.ctx.font = 'bold 24px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(this.score, boardX + scoreBoard.width/2, boardY + scoreBoard.height/2 + 8);
-    }
-
-    gameLoop() {
-        if (!this.loaded) return;
-        
-        this.updateAnimation();
-        this.draw();
-        setTimeout(() => this.gameLoop(), 1000/30); // 30fps
-    }
-
-    startGame() {
-        this.gameLoop();
-    }
-}
-
-// 启动游戏
-new ChickenGame();
-</script>
+        // 启动图片加载
+        loadImages();
+    </script>
 </body>
 </html>
