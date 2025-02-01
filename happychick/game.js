@@ -1,11 +1,4 @@
 // Polyfill: 确保在不支持 requestAnimationFrame 的环境下使用 setTimeout 实现
-window.requestAnimationFrame = window.requestAnimationFrame ||
-                               window.webkitRequestAnimationFrame ||
-                               window.mozRequestAnimationFrame ||
-                               function(callback) {
-                                  return setTimeout(callback, 1000 / 60);
-                               };
-
 // 获取 canvas 和绘图上下文
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
