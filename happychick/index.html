@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Animation</title>
+    <title>Canvas Frame Animation</title>
 </head>
 <body>
-    <h1>Canvas Animation</h1>
+    <h1>Canvas Frame Animation</h1>
     <canvas id="myCanvas" width="400" height="200" style="border:1px solid #000000;">
         Your browser does not support the HTML5 canvas tag.
     </canvas>
@@ -15,43 +15,52 @@
         var canvas = document.getElementById('myCanvas');
         var ctx = canvas.getContext('2d');
 
-        var img = new Image();
-        img.src = 'images/egg.png'; // 确保路径正确
+        // 图片路径
+        var imagePaths = ['images/idle1.png', 'images/idle2.png'];
+        var images = []; // 存储加载的图片
+        var currentFrame = 0; // 当前帧索引
+        var frameCount = imagePaths.length; // 总帧数
+        var x = 50; // 图片的 x 坐标
+        var y = 50; // 图片的 y 坐标
+        var frameDelay = 200; // 每帧的延迟时间（毫秒）
 
-        var x = 0; // 图片的初始 x 坐标
-        var speed = 2; // 移动速度
+        // 加载所有图片
+        function loadImages() {
+            var loadedCount = 0;
+            imagePaths.forEach(function(path, index) {
+                var img = new Image();
+                img.src = path;
+                img.onload = function() {
+                    loadedCount++;
+                    if (loadedCount === frameCount) {
+                        // 所有图片加载完成后启动动画
+                        setTimeout(draw, frameDelay);
+                    }
+                };
+                img.onerror = function() {
+                    console.error('Failed to load image:', path);
+                };
+                images[index] = img;
+            });
+        }
 
+        // 绘制动画
         function draw() {
             // 清空 Canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 绘制图片
-            ctx.drawImage(img, x, 50);
+            // 绘制当前帧的图片
+            ctx.drawImage(images[currentFrame], x, y);
 
-            // 更新 x 坐标
-            x += speed;
+            // 切换到下一帧
+            currentFrame = (currentFrame + 1) % frameCount;
 
-            // 如果图片超出 Canvas 边界，重置位置
-            if (x > canvas.width) {
-                x = -img.width; // 重置到左侧
-            }
-
-            // 使用 setTimeout 代替 requestAnimationFrame
-            setTimeout(draw, 30); // 每 30 毫秒更新一帧
+            // 请求下一帧动画
+            setTimeout(draw, frameDelay);
         }
 
-        // 图片加载完成后启动动画
-        img.onload = function() {
-            draw(); // 确保 draw 函数被调用
-        };
-
-        // 如果图片加载失败，显示错误信息
-        img.onerror = function() {
-            console.error('Failed to load image.');
-            ctx.font = '20px Arial';
-            ctx.fillStyle = 'red';
-            ctx.fillText('Failed to load image.', 50, 100);
-        };
+        // 启动图片加载
+        loadImages();
     </script>
 </body>
 </html>
