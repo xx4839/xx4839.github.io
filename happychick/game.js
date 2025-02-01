@@ -13,13 +13,8 @@ const ctx = canvas.getContext('2d');
 // 小鸡当前位置（基准位置，用于移动和状态计算）
 let chickX = canvas.width / 2;
 let chickY = canvas.height / 2;
-// 新目标位置（移动时用）
-let targetX = chickX;
-let targetY = chickY;
-// 当前状态：idle（待机）、moving（移动）、egg（下蛋）
+// 当前状态：idle（待机）、egg（下蛋）
 let currentState = "idle";
-// 移动速度（每帧移动的像素值，可根据需要调整）
-const moveSpeed = 5;
 
 // 已下鸡蛋数组，每个元素为 { x, y }（鸡蛋绘制位置）
 const laidEggs = [];
@@ -50,22 +45,7 @@ function gameLoop(timestamp) {
   });
   
   // 状态机逻辑处理
-  if (currentState === "moving") {
-    // 计算当前位置与目标位置的差值
-    const dx = targetX - chickX;
-    const dy = targetY - chickY;
-    if (Math.abs(dx) < moveSpeed && Math.abs(dy) < moveSpeed) {
-      // 到达目标位置，切换到下蛋状态
-      chickX = targetX;
-      chickY = targetY;
-      currentState = "egg";
-    } else {
-      // 按直线方向移动
-      const angle = Math.atan2(dy, dx);
-      chickX += moveSpeed * Math.cos(angle);
-      chickY += moveSpeed * Math.sin(angle);
-    }
-  } else if (currentState === "egg") {
+  if (currentState === "egg") {
     // 下蛋逻辑
     laidEggs.push({
       x: chickX + chickImage.width / 2 - eggImage.width / 2,
@@ -107,10 +87,10 @@ canvas.addEventListener("click", function(event) {
   if (clickX >= chickX && clickX <= chickX + chickImage.width &&
       clickY >= chickY && clickY <= chickY + chickImage.height) {
     // 随机生成新的目标位置（保证小鸡不会超出画布边界）
-    targetX = Math.random() * (canvas.width - chickImage.width);
-    targetY = Math.random() * (canvas.height - chickImage.height);
-    // 切换到移动状态
-    currentState = "moving";
+    chickX = Math.random() * (canvas.width - chickImage.width);
+    chickY = Math.random() * (canvas.height - chickImage.height);
+    // 切换到下蛋状态
+    currentState = "egg";
   }
 });
 
