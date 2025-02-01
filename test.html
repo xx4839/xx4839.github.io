@@ -1,177 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>KPW3 Happy Chicken</title>
-    <meta charset="utf-8">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #e0e0e0;
-            touch-action: none;
-            -webkit-user-select: none;
-        }
-        #gameCanvas {
-            margin: 0 auto;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas 排查测试</title>
+  <style>
+    body { margin: 0; padding: 0; background: #ccc; }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #000;
+      background-color: #fff;
+    }
+  </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
+  <canvas id="myCanvas" width="400" height="300"></canvas>
+  <script>
+    // Polyfill: 确保在不支持 requestAnimationFrame 的环境下使用 setTimeout
+    window.requestAnimationFrame = window.requestAnimationFrame ||
+      window.webkitRequestAnimationFrame ||
+      window.mozRequestAnimationFrame ||
+      function(callback) { setTimeout(callback, 1000/60); };
 
-<script>
-// Kindle PaperWhite 3适配配置
-const SCREEN_WIDTH = 758;  // KPW3屏幕宽度
-const SCREEN_HEIGHT = 1024; // KPW3屏幕高度
-const GRAVITY = 0.5;
-const JUMP_FORCE = -10;
-const OBSTACLE_GAP = 200;
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
 
-// 游戏状态对象
-const gameState = {
-    bird: {
-        x: 100,
-        y: SCREEN_HEIGHT/2,
-        velocity: 0,
-        size: 30
-    },
-    obstacles: [],
-    score: 0,
-    highScore: localStorage.getItem('highScore') || 0,
-    isPlaying: false
-};
+    // 简单动画循环，绘制红色矩形和提示文字
+    function draw() {
+      // 清除画布
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-// 初始化Canvas
-const canvas = document.getElementById('gameCanvas');
-canvas.width = SCREEN_WIDTH;
-canvas.height = SCREEN_HEIGHT;
-const ctx = canvas.getContext('2d');
+      // 绘制一个红色矩形
+      ctx.fillStyle = "red";
+      ctx.fillRect(50, 50, 100, 100);
 
-// Kindle按键事件处理（使用方向键控制）
-document.addEventListener('keydown', (e) => {
-    if(e.keyCode === 104) { // 上方向键
-        if(gameState.isPlaying) {
-            gameState.bird.velocity = JUMP_FORCE;
-        } else {
-            startGame();
-        }
+      // 绘制文字提示
+      ctx.fillStyle = "black";
+      ctx.font = "20px Arial";
+      ctx.fillText("Canvas 工作正常", 50, 200);
+
+      requestAnimationFrame(draw);
     }
-});
-
-function startGame() {
-    gameState.bird.y = SCREEN_HEIGHT/2;
-    gameState.bird.velocity = 0;
-    gameState.obstacles = [];
-    gameState.score = 0;
-    gameState.isPlaying = true;
-    generateObstacle();
-}
-
-function generateObstacle() {
-    const gapPosition = Math.random() * (SCREEN_HEIGHT - OBSTACLE_GAP - 100) + 50;
-    gameState.obstacles.push({
-        x: SCREEN_WIDTH,
-        gap: gapPosition,
-        passed: false
-    });
-}
-
-function update() {
-    if(!gameState.isPlaying) return;
-
-    // 更新小鸟位置
-    gameState.bird.velocity += GRAVITY;
-    gameState.bird.y += gameState.bird.velocity;
-
-    // 更新障碍物
-    gameState.obstacles.forEach(obstacle => {
-        obstacle.x -= 2;
-
-        // 碰撞检测
-        if(checkCollision(obstacle)) {
-            gameOver();
-        }
-
-        // 计分
-        if(!obstacle.passed && obstacle.x < gameState.bird.x) {
-            obstacle.passed = true;
-            gameState.score++;
-            if(gameState.score > gameState.highScore) {
-                gameState.highScore = gameState.score;
-                localStorage.setItem('highScore', gameState.highScore);
-            }
-        }
-    });
-
-    // 生成新障碍物
-    if(gameState.obstacles[gameState.obstacles.length-1].x < SCREEN_WIDTH - 300) {
-        generateObstacle();
-    }
-
-    // 移除屏幕外障碍物
-    if(gameState.obstacles[0].x < -50) {
-        gameState.obstacles.shift();
-    }
-
-    // 边界检测
-    if(gameState.bird.y > SCREEN_HEIGHT || gameState.bird.y < 0) {
-        gameOver();
-    }
-}
-
-function checkCollision(obstacle) {
-    const bird = gameState.bird;
-    return (bird.x + bird.size/2 > obstacle.x && 
-            bird.x - bird.size/2 < obstacle.x + 50 && 
-            (bird.y - bird.size/2 < obstacle.gap || 
-             bird.y + bird.size/2 > obstacle.gap + OBSTACLE_GAP));
-}
-
-function gameOver() {
-    gameState.isPlaying = false;
-}
-
-function draw() {
-    // 清空画布
-    ctx.fillStyle = '#e0e0e0';
-    ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-    // 绘制小鸟
-    ctx.fillStyle = '#ffd700';
-    ctx.beginPath();
-    ctx.arc(gameState.bird.x, gameState.bird.y, gameState.bird.size/2, 0, Math.PI*2);
-    ctx.fill();
-
-    // 绘制障碍物
-    ctx.fillStyle = '#2ecc71';
-    gameState.obstacles.forEach(obstacle => {
-        ctx.fillRect(obstacle.x, 0, 50, obstacle.gap);
-        ctx.fillRect(obstacle.x, obstacle.gap + OBSTACLE_GAP, 50, SCREEN_HEIGHT);
-    });
-
-    // 绘制分数
-    ctx.fillStyle = '#2c3e50';
-    ctx.font = '40px Arial';
-    ctx.fillText(`Score: ${gameState.score}`, 20, 50);
-    ctx.fillText(`Best: ${gameState.highScore}`, 20, 100);
-
-    // 游戏结束提示
-    if(!gameState.isPlaying) {
-        ctx.fillStyle = '#e74c3c';
-        ctx.font = '60px Arial';
-        ctx.fillText('Tap to Start', SCREEN_WIDTH/2 - 150, SCREEN_HEIGHT/2);
-    }
-}
-
-// 游戏循环（使用setTimeout适配KPW3浏览器）
-function gameLoop() {
-    update();
     draw();
-    setTimeout(gameLoop, 1000/30);
-}
-
-// 启动游戏
-gameLoop();
-</script>
+  </script>
 </body>
 </html>
