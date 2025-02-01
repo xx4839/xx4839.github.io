@@ -45,32 +45,11 @@ function update() {
   drawChick();  // 绘制小鸡
   drawEggs();   // 绘制鸡蛋
 }
-
-// 处理键盘输入
-document.addEventListener('keydown', (event) => {
-  switch (event.key) {
-    case 'ArrowUp':
-      chick.y -= chick.speed;
-      break;
-    case 'ArrowDown':
-      chick.y += chick.speed;
-      break;
-    case 'ArrowLeft':
-      chick.x -= chick.speed;
-      break;
-    case 'ArrowRight':
-      chick.x += chick.speed;
-      break;
-  }
-});
-
 // 游戏循环
 function gameLoop() {
   update();
-  requestAnimationFrame(gameLoop);
+  setInterval(gameLoop, 16);
 }
-
-// 确保图片加载完成后再启动游戏
 Promise.all([
   new Promise(resolve => { chickImage.onload = resolve; }),
   new Promise(resolve => { eggImage.onload = resolve; })
