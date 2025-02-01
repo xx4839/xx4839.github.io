@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>快乐小鸡游戏</title>
+  <title>Canvas 测试</title>
   <style>
     body { margin: 0; padding: 0; background: #ccc; }
     canvas {
@@ -12,40 +12,14 @@
       margin: 20px auto;
       border: 1px solid #999;
     }
-    #log {
-      margin: 20px auto;
-      width: 800px;
-      height: 100px;
-      background-color: #fff;
-      border: 1px solid #999;
-      padding: 10px;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      overflow-y: auto;
-    }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <canvas id="testCanvas" width="400" height="300"></canvas>
   <div id="log">日志输出：</div>
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('testCanvas');
     const logElement = document.getElementById('log'); // 日志输出元素
-
-    // 小鸡当前位置
-    let chickX = canvas.width / 2;
-    let chickY = canvas.height / 2;
-
-    // 图片素材路径
-    const chickImage = new Image();
-    chickImage.src = 'images/chick.png'; // 小鸡图片路径
-
-    const eggImage = new Image();
-    eggImage.src = 'images/egg.png';    // 鸡蛋图片路径
-
-    const scoreImage = new Image();
-    scoreImage.src = 'images/score.png'; // 分数底板图片路径
 
     // 日志输出函数
     function log(message) {
@@ -53,53 +27,19 @@
       logElement.scrollTop = logElement.scrollHeight; // 自动滚动到底部
     }
 
-    // 图片加载检测
-    chickImage.onload = function() {
-      log("chick.png 加载成功");
-    };
-    chickImage.onerror = function() {
-      log("chick.png 加载失败");
-    };
+    // 检查是否支持 Canvas
+    if (canvas.getContext) {
+      log("您的浏览器支持 Canvas！");
 
-    eggImage.onload = function() {
-      log("egg.png 加载成功");
-    };
-    eggImage.onerror = function() {
-      log("egg.png 加载失败");
-    };
+      const ctx = canvas.getContext('2d');
 
-    scoreImage.onload = function() {
-      log("score.png 加载成功");
-    };
-    scoreImage.onerror = function() {
-      log("score.png 加载失败");
-    };
-
-    // 游戏主循环
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 绘制小鸡
-      if (chickImage.complete) {
-        ctx.drawImage(chickImage, chickX, chickY);
-        log("绘制小鸡");
-      }
-
-      // 使用 setTimeout 替代 setInterval
-      setTimeout(gameLoop, 16);
+      // 绘制一个红色矩形
+      ctx.fillStyle = "red";
+      ctx.fillRect(50, 50, 100, 100);
+      log("已绘制一个红色矩形");
+    } else {
+      log("您的浏览器不支持 Canvas。");
     }
-
-    // 确保所有图片加载完成
-    Promise.all([
-      new Promise(resolve => { chickImage.onload = resolve; }),
-      new Promise(resolve => { eggImage.onload = resolve; }),
-      new Promise(resolve => { scoreImage.onload = resolve; })
-    ]).then(() => {
-      log("所有图片加载完成，启动游戏循环");
-      gameLoop(); // 启动游戏循环
-    }).catch(error => {
-      log("图片加载失败，无法启动游戏");
-    });
   </script>
 </body>
 </html>
