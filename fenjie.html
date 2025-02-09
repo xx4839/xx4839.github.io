@@ -1,173 +1,105 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数字分解游戏</title>
+    <title>数字分解</title>
     <style>
-        body {
-            font-family: Arial;
-            text-align: center;
-            background: #F0F0F0;
+        /* 页面样式 */
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
         }
-        #target {
-            font-size: 48px;
-            margin: 20px 0;
-        }
-        .split-box {
+
+        /* 大数字容器 */
+        .number-container {
             position: relative;
-            width: 200px;
-            height: 100px;
-            margin: 20px auto;
+            text-align: center;
         }
+
+        /* 大数字样式 */
+        .number {
+            font-size: 100px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 斜线样式 */
         .line {
             position: absolute;
             width: 2px;
-            height: 40px;
-            background: black;
-            transform: rotate(-45deg);
-            left: 90px;
-            top: -20px;
+            height: 100px;
+            background-color: #333;
+            transform-origin: top;
         }
-        #leftNum {
-            position: absolute;
-            left: 30px;
-            top: 50px;
-            font-size: 32px;
-        }
-        #rightNum {
-            position: absolute;
-            right: 30px;
-            top: 50px;
-            font-size: 32px;
-            width: 40px;
-            border-bottom: 2px solid black;
-        }
-        .options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            max-width: 300px;
-            margin: 20px auto;
-        }
-        button {
-            font-size: 24px;
-            padding: 15px;
-            background: #FFF;
-            border: 2px solid #333;
-            border-radius: 5px;
-            touch-action: manipulation;
-        }
-        #counters {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            font-size: 18px;
-        }
-        #gameOver {
-            display: none;
-            position: fixed;
-            top: 50%;
+
+        /* 左下角斜线 */
+        .line-left {
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border: 2px solid black;
+            bottom: -100px;
+            transform: rotate(-45deg);
+        }
+
+        /* 右下角斜线 */
+        .line-right {
+            left: 50%;
+            bottom: -100px;
+            transform: rotate(45deg);
+        }
+
+        /* 方框容器 */
+        .box-container {
+            position: absolute;
+            bottom: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 100px;
+        }
+
+        /* 方框样式 */
+        .box {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            background-color: #fff;
         }
     </style>
 </head>
 <body>
-    <div id="target">?</div>
-    <div class="split-box">
-        <div class="line"></div>
-        <div id="leftNum"></div>
-        <div id="rightNum"></div>
+    <!-- 数字和斜线容器 -->
+    <div class="number-container">
+        <!-- 大数字 -->
+        <div class="number">
+            7
+        </div>
+
+        <!-- 左下角斜线 -->
+        <div class="line line-left"></div>
+
+        <!-- 右下角斜线 -->
+        <div class="line line-right"></div>
+
+        <!-- 方框容器 -->
+        <div class="box-container">
+            <!-- 左下角方框 -->
+            <div class="box" id="box-left">
+                3
+            </div>
+
+            <!-- 右下角方框 -->
+            <div class="box" id="box-right">
+                4
+            </div>
+        </div>
     </div>
-    <div class="options"></div>
-    <div id="counters">
-        <div>正确: <span id="correctCount">0</span></div>
-        <div>错误: <span id="wrongCount">0</span></div>
-    </div>
-    <div id="gameOver">
-        <p id="gameResult"></p>
-        <button onclick="newGame()">新游戏</button>
-    </div>
-
-<script>
-let currentTarget, knownNum, answer;
-let correct = 0, wrong = 0;
-
-function generateProblem() {
-    currentTarget = Math.floor(Math.random() * 10) + 1; // 1-10
-    knownNum = Math.floor(Math.random() * 9) + 1; // 1-9
-    answer = currentTarget - knownNum;
-    
-    // 确保答案在1-9范围内
-    if (answer < 1 || answer > 9) {
-        return generateProblem(); // 重新生成
-    }
-    
-    // 随机显示左边或右边的已知数字
-    if (Math.random() > 0.5) {
-        document.getElementById('leftNum').textContent = knownNum;
-        document.getElementById('rightNum').textContent = '';
-    } else {
-        document.getElementById('leftNum').textContent = '';
-        document.getElementById('rightNum').textContent = knownNum;
-        [knownNum, answer] = [answer, knownNum]; // 交换数值
-    }
-    
-    document.getElementById('target').textContent = currentTarget;
-    generateOptions();
-}
-
-function generateOptions() {
-    const options = new Set([answer]);
-    while (options.size < 4) {
-        let num = Math.floor(Math.random() * 9) + 1;
-        if (num !== knownNum && currentTarget - num !== knownNum) {
-            options.add(num);
-        }
-    }
-    const optionsDiv = document.querySelector('.options');
-    optionsDiv.innerHTML = '';
-    [...options].sort(() => Math.random() - 0.5).forEach(num => {
-        const btn = document.createElement('button');
-        btn.textContent = num;
-        btn.onclick = () => checkAnswer(num);
-        optionsDiv.appendChild(btn);
-    });
-}
-
-function checkAnswer(selected) {
-    const result = (knownNum + selected) === currentTarget;
-    result ? correct++ : wrong++;
-    
-    document.getElementById('correctCount').textContent = correct;
-    document.getElementById('wrongCount').textContent = wrong;
-    
-    if (correct >= 100) endGame(true);
-    else if (wrong >= 5) endGame(false);
-    else generateProblem();
-}
-
-function endGame(isWin) {
-    document.getElementById('gameOver').style.display = 'block';
-    document.getElementById('gameResult').textContent = isWin 
-        ? "恭喜通关！" 
-        : "游戏结束！";
-}
-
-function newGame() {
-    correct = wrong = 0;
-    document.getElementById('correctCount').textContent = '0';
-    document.getElementById('wrongCount').textContent = '0';
-    document.getElementById('gameOver').style.display = 'none';
-    generateProblem();
-}
-
-// 初始化游戏
-newGame();
-</script>
 </body>
 </html>
