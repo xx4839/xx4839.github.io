@@ -128,11 +128,17 @@
         function generateOptions(correct, target) {
             const options = [correct];
             // 生成三个错误选项
-            while (options.length < 4) {
+            let attempts = 0;
+            while (options.length < 4 && attempts < 100) { // 增加最大尝试次数
                 const randomNum = Math.floor(Math.random() * (target - 1)) + 1;
                 if (!options.includes(randomNum) && randomNum !== (target - correct)) {
                     options.push(randomNum);
                 }
+                attempts++;
+            }
+            // 如果选项不足，补充随机数字
+            while (options.length < 4) {
+                options.push(Math.floor(Math.random() * 9) + 1);
             }
             // 打乱选项顺序
             options.sort(() => Math.random() - 0.5);
