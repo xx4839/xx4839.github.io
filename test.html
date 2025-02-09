@@ -1,25 +1,156 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS Test</title>
+    <title>数字分解游戏</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             background-color: #f0f0f0;
         }
-        .test {
+
+        #target-number {
+            font-size: 80px;
+            margin: 20px;
+            color: #333;
+        }
+
+        .decompose-container {
+            display: flex;
+            gap: 60px;
+            margin: 40px;
+        }
+
+        .number-box {
+            width: 120px;
+            height: 120px;
+            border: 3px solid #333;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            font-size: 40px;
+            background-color: white;
+        }
+
+        #options {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 500px;
+            justify-content: center;
+        }
+
+        .option-btn {
+            padding: 15px 30px;
             font-size: 24px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .option-btn:hover {
+            background-color: #45a049;
+        }
+
+        .option-btn.wrong {
+            background-color: #ff4444;
+        }
+
+        .hidden {
+            visibility: hidden;
         }
     </style>
 </head>
 <body>
-    <div class="test">
-        CSS 是支持的！
+    <div id="target-number">8</div>
+    <div class="decompose-container">
+        <div id="left-number" class="number-box"></div>
+        <div id="right-number" class="number-box"></div>
     </div>
+    <div id="options"></div>
+
+    <script>
+        let currentNumbers = { left: null, right: null };
+        let correctAnswer = null;
+
+        function generateQuestion() {
+            // 生成随机数字（5-20）
+            const target = Math.floor(Math.random() * 16) + 5;
+            document.getElementById('target-number').textContent = target;
+
+            // 生成分解数字
+            const left = Math.floor(Math.random() * (target - 1)) + 1;
+            const right = target - left;
+            
+            // 随机决定隐藏左边还是右边
+            const hideLeft = Math.random() < 0.5;
+            
+            currentNumbers = { left, right };
+            
+            // 更新显示
+            document.getElementById('left-number').textContent = hideLeft ? '' : left;
+            document.getElementById('right-number').textContent = hideLeft ? right : '';
+
+            // 设置正确答案
+            correctAnswer = hideLeft ? left : right;
+            
+            // 生成选项
+            generateOptions(correctAnswer, target);
+        }
+
+        function generateOptions(correct, target) {
+            const options = [correct];
+            // 生成三个错误选项
+            while (options.length < 4) {
+                const randomNum = Math.floor(Math.random() * (target - 1)) + 1;
+                if (!options.includes(randomNum) && randomNum !== (target - correct)) {
+                    options.push(randomNum);
+                }
+            }
+            // 打乱选项顺序
+            options.sort(() => Math.random() - 0.5);
+
+            // 创建按钮
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            options.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = num;
+                btn.onclick = () => checkAnswer(num);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            const options = document.querySelectorAll('.option-btn');
+            if (selected === correctAnswer) {
+                // 显示正确答案
+                document.getElementById('left-number').textContent = currentNumbers.left;
+                document.getElementById('right-number').textContent = currentNumbers.right;
+                setTimeout(() => {
+                    alert('回答正确！');
+                    generateQuestion();
+                }, 500);
+            } else {
+                // 错误处理
+                options.forEach(btn => {
+                    if (parseInt(btn.textContent) === selected) {
+                        btn.classList.add('wrong');
+                    }
+                });
+            }
+        }
+
+        // 初始化游戏
+        generateQuestion();
+    </script>
 </body>
 </html>
