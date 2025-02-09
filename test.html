@@ -16,7 +16,7 @@
         #target-number {
             font-size: 60px;
             margin: 20px 0;
-            color: #333;
+            color: #000; /* 黑色字体 */
         }
 
         .decompose-container {
@@ -27,12 +27,13 @@
             display: inline-block;
             width: 80px;
             height: 80px;
-            border: 2px solid #333;
+            border: 2px solid #000; /* 黑色边框 */
             text-align: center;
             font-size: 40px;
-            background-color: white;
+            background-color: #fff; /* 白色背景 */
+            color: #000; /* 黑色字体 */
             margin: 0 10px;
-            color: #333; /* 显式设置字体颜色 */
+            line-height: 80px; /* 垂直居中 */
         }
 
         #options {
@@ -43,34 +44,36 @@
             display: inline-block;
             padding: 15px 25px;
             font-size: 24px;
-            border: 2px solid #333;
-            background-color: #4CAF50;
-            color: white;
+            border: 2px solid #000; /* 黑色边框 */
+            background-color: #4CAF50; /* 绿色背景 */
+            color: #fff; /* 白色字体 */
             cursor: pointer;
             margin: 5px;
         }
 
         .option-btn.wrong {
-            background-color: #ff4444;
+            background-color: #ff4444; /* 红色背景 */
         }
 
         .score-container, .error-container {
             font-size: 20px;
             margin: 10px 0;
+            color: #000; /* 黑色字体 */
         }
 
         .game-over, .game-won {
             font-size: 30px;
             margin-top: 20px;
             display: none;
+            color: #000; /* 黑色字体 */
         }
 
         .game-over {
-            color: #ff4444;
+            color: #ff4444; /* 红色字体 */
         }
 
         .game-won {
-            color: #4CAF50;
+            color: #4CAF50; /* 绿色字体 */
         }
     </style>
 </head>
@@ -100,7 +103,7 @@
         function generateQuestion() {
             // 生成随机数字（2-10）
             const target = Math.floor(Math.random() * 9) + 2;
-            document.getElementById('target-number').innerText = target;
+            document.getElementById('target-number').innerHTML = target;
 
             // 生成分解数字
             const left = Math.floor(Math.random() * (target - 1)) + 1;
@@ -112,8 +115,8 @@
             currentNumbers = { left, right };
             
             // 更新显示
-            document.getElementById('left-number').innerText = hideLeft ? '' : left;
-            document.getElementById('right-number').innerText = hideLeft ? right : '';
+            document.getElementById('left-number').innerHTML = hideLeft ? '' : left;
+            document.getElementById('right-number').innerHTML = hideLeft ? right : '';
 
             // 设置正确答案
             correctAnswer = hideLeft ? left : right;
@@ -140,7 +143,7 @@
             options.forEach(num => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
-                btn.innerText = num; // 使用 innerText 替代 textContent
+                btn.innerHTML = num; // 使用 innerHTML 替代 innerText
                 btn.onclick = () => checkAnswer(num);
                 optionsContainer.appendChild(btn);
             });
@@ -151,10 +154,10 @@
             if (selected === correctAnswer) {
                 // 更新正确计数
                 correctCount++;
-                document.getElementById('correct-count').innerText = correctCount;
+                document.getElementById('correct-count').innerHTML = correctCount;
                 // 显示正确答案
-                document.getElementById('left-number').innerText = currentNumbers.left;
-                document.getElementById('right-number').innerText = currentNumbers.right;
+                document.getElementById('left-number').innerHTML = currentNumbers.left;
+                document.getElementById('right-number').innerHTML = currentNumbers.right;
                 // 检查是否通关
                 if (correctCount >= 100) {
                     document.getElementById('game-won').style.display = 'block';
@@ -167,11 +170,11 @@
             } else {
                 // 更新错误计数
                 errorCount++;
-                document.getElementById('error-count').innerText = errorCount;
+                document.getElementById('error-count').innerHTML = errorCount;
                 // 错误处理
                 options.forEach(btn => {
-                    if (parseInt(btn.innerText) === selected) {
-                        btn.classList.add('wrong');
+                    if (parseInt(btn.innerHTML) === selected) {
+                        btn.className += ' wrong';
                     }
                 });
                 // 检查是否游戏结束
