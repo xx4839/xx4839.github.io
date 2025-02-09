@@ -2,69 +2,81 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数字分解游戏</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
             background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
         }
 
         #target-number {
-            font-size: 80px;
-            margin: 20px;
+            font-size: 60px;
+            margin: 20px 0;
             color: #333;
         }
 
         .decompose-container {
             display: flex;
-            gap: 60px;
-            margin: 40px;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
         }
 
         .number-box {
-            width: 120px;
-            height: 120px;
-            border: 3px solid #333;
+            width: 80px;
+            height: 80px;
+            border: 2px solid #333;
             border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 40px;
+            font-size: 30px;
             background-color: white;
         }
 
         #options {
             display: flex;
-            gap: 20px;
             flex-wrap: wrap;
-            max-width: 500px;
             justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
         }
 
         .option-btn {
-            padding: 15px 30px;
-            font-size: 24px;
-            border: none;
-            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 20px;
+            border: 2px solid #333;
+            border-radius: 5px;
             background-color: #4CAF50;
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .option-btn:hover {
-            background-color: #45a049;
         }
 
         .option-btn.wrong {
             background-color: #ff4444;
         }
 
-        .hidden {
-            visibility: hidden;
+        .score-container, .error-container {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .game-over, .game-won {
+            font-size: 30px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .game-over {
+            color: #ff4444;
+        }
+
+        .game-won {
+            color: #4CAF50;
         }
     </style>
 </head>
@@ -76,13 +88,21 @@
     </div>
     <div id="options"></div>
 
+    <div class="score-container">正确: <span id="correct-count">0</span></div>
+    <div class="error-container">错误: <span id="error-count">0</span></div>
+
+    <div id="game-over" class="game-over">游戏结束！</div>
+    <div id="game-won" class="game-won">恭喜通关！</div>
+
     <script>
         let currentNumbers = { left: null, right: null };
         let correctAnswer = null;
+        let correctCount = 0;
+        let errorCount = 0;
 
         function generateQuestion() {
-            // 生成随机数字（5-20）
-            const target = Math.floor(Math.random() * 16) + 5;
+            // 生成随机数字（2-10）
+            const target = Math.floor(Math.random() * 9) + 2;
             document.getElementById('target-number').textContent = target;
 
             // 生成分解数字
@@ -132,20 +152,35 @@
         function checkAnswer(selected) {
             const options = document.querySelectorAll('.option-btn');
             if (selected === correctAnswer) {
+                // 更新正确计数
+                correctCount++;
+                document.getElementById('correct-count').textContent = correctCount;
                 // 显示正确答案
                 document.getElementById('left-number').textContent = currentNumbers.left;
                 document.getElementById('right-number').textContent = currentNumbers.right;
+                // 检查是否通关
+                if (correctCount >= 100) {
+                    document.getElementById('game-won').style.display = 'block';
+                    return;
+                }
+                // 延迟后生成新题目
                 setTimeout(() => {
-                    alert('回答正确！');
                     generateQuestion();
                 }, 500);
             } else {
+                // 更新错误计数
+                errorCount++;
+                document.getElementById('error-count').textContent = errorCount;
                 // 错误处理
                 options.forEach(btn => {
                     if (parseInt(btn.textContent) === selected) {
                         btn.classList.add('wrong');
                     }
                 });
+                // 检查是否游戏结束
+                if (errorCount >= 5) {
+                    document.getElementById('game-over').style.display = 'block';
+                }
             }
         }
 
