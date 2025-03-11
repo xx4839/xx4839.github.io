@@ -1,19 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>图片下载</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
         body {
-            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
-            background: url('xindian.png') no-repeat center center;
-            background-size: cover; /* 或 contain */
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        a {
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.3s;
+        }
+        a:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
-<body></body>
+<body>
+    <a href="xindian.png" download="xindian.png">点击下载图片</a>
+</body>
 </html>
